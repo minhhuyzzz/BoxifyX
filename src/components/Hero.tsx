@@ -34,11 +34,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
   const priceResult = calculateLockerFee(quickSize, quickHours);
 
   return (
-    <section id="hero-section" className="relative overflow-hidden pt-2 pb-0 bg-transparent">
-      {/* Ambient background glows spanning up to the header */}
-      <div className="absolute -top-32 left-1/4 w-[750px] h-[500px] bg-gradient-to-tr from-amber-300/30 via-orange-300/20 to-transparent blur-3xl pointer-events-none -z-10 rounded-full" />
-      <div className="absolute -top-28 right-10 w-[650px] h-[550px] bg-gradient-to-br from-orange-400/20 to-amber-200/15 blur-3xl pointer-events-none -z-10 rounded-full" />
-
+    <section id="hero-section" className="relative overflow-hidden pt-4 pb-4 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ======================================================== */}
@@ -50,19 +46,18 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
           <div className="lg:col-span-6 space-y-6 text-left">
 
             {/* Top Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-amber-300 shadow-sm text-zinc-900 text-xs font-black tracking-wide uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 shadow-sm text-zinc-800 text-xs font-black tracking-wide uppercase">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
               <span>Nền Tảng Lưu Trữ Kỹ Thuật Số • 27 Trạm Toàn TP.HCM</span>
             </div>
 
-            {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-black text-zinc-950 leading-[1.35] tracking-normal space-y-2">
-              <span className="block">Dịch Vụ Lưu Trữ Valet &</span>
-              <span className="block">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 inline-block py-1 pr-1">
-                  Tủ Đồ Thông Minh
-                </span>{' '}
-                <span className="text-zinc-950 inline-block">TP.HCM</span>
+            {/* Main Headline: Cấu trúc flex-col độc lập, giãn cách vật lý rõ ràng, không bị dính dấu hay mất nét */}
+            <h1 className="flex flex-col gap-2.5 font-black tracking-tight text-zinc-950">
+              <span className="text-3xl sm:text-4xl lg:text-[42px] leading-tight text-zinc-950">
+                Dịch Vụ Lưu Trữ Valet &amp;
+              </span>
+              <span className="text-3xl sm:text-4xl lg:text-[42px] leading-tight text-amber-500">
+                Tủ Đồ Thông Minh TP.HCM
               </span>
             </h1>
 

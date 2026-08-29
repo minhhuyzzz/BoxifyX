@@ -191,7 +191,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-amber-50/80 via-white to-[#fafafa] text-zinc-900 font-sans selection:bg-amber-500 selection:text-white pb-20 lg:pb-0">
+    <div className="min-h-screen flex flex-col bg-white text-zinc-900 font-sans selection:bg-amber-500 selection:text-white pb-20 lg:pb-0">
       {/* Navigation Header */}
       <Navbar
         currentPage={currentPage}
