@@ -112,7 +112,7 @@ export function App() {
     };
   }, []);
 
-  // Check existing Supabase session on mount
+  // Check existing Supabase session and load all customer data on mount
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -131,46 +131,85 @@ export function App() {
         setStations(liveStations);
       }
     });
+
+    // Fetch valet orders (Tủ đồ số hóa) from Supabase & LocalStorage
+    supabaseService.getValetOrders().then((liveValetOrders) => {
+      if (liveValetOrders && liveValetOrders.length > 0) {
+        setValetOrders(liveValetOrders);
+      }
+    });
+
+    // Fetch locker bookings (Đơn Smart Locker) from Supabase & LocalStorage
+    supabaseService.getLockerBookings().then((liveBookings) => {
+      if (liveBookings && liveBookings.length > 0) {
+        setLockerBookings(liveBookings);
+      }
+    });
   }, []);
 
-  // Active bookings list
-  const [lockerBookings, setLockerBookings] = useState<LockerBooking[]>([
-    {
-      id: 'LB-90211',
-      stationId: 'sta-tsn',
-      stationName: 'BoxifyX Sân Bay Tân Sơn Nhất (Ga Quốc Tế)',
-      lockerNumber: 'S-14',
-      size: 'S',
-      startTime: '08:30',
-      estimatedEndTime: '14:30 (Hôm nay)',
-      estimatedHours: 6,
-      prepaidAmount: 30000,
-      overdueAmount: 0,
-      totalAmount: 30000,
-      pinCode: '852914',
-      isP2PEnabled: true,
-      p2pRecipientPhone: '0909888777',
-      p2pRecipientName: 'Chị Mai Lan',
-      status: 'active',
-      isDoorOpen: false,
-    },
-  ]);
+  // Re-sync customer orders whenever user logs in
+  useEffect(() => {
+    if (currentUser) {
+      supabaseService.getValetOrders().then((liveValetOrders) => {
+        if (liveValetOrders && liveValetOrders.length > 0) {
+          setValetOrders(liveValetOrders);
+        }
+      });
+      supabaseService.getLockerBookings().then((liveBookings) => {
+        if (liveBookings && liveBookings.length > 0) {
+          setLockerBookings(liveBookings);
+        }
+      });
+    }
+  }, [currentUser]);
 
-  // Valet orders list (empty initial state, populated upon live customer booking or Supabase sync)
-  const [valetOrders, setValetOrders] = useState<ValetOrder[]>([]);
+  // Active bookings list (khởi tạo từ LocalStorage để không bao giờ bị mất)
+  const [lockerBookings, setLockerBookings] = useState<LockerBooking[]>(() => {
+    const local = supabaseService.getLocalLockerBookings();
+    if (local.length > 0) return local;
+    return [
+      {
+        id: 'LB-90211',
+        stationId: 'sta-tsn',
+        stationName: 'BoxifyX Sân Bay Tân Sơn Nhất (Ga Quốc Tế)',
+        lockerNumber: 'S-14',
+        size: 'S',
+        startTime: '08:30',
+        estimatedEndTime: '14:30 (Hôm nay)',
+        estimatedHours: 6,
+        prepaidAmount: 30000,
+        overdueAmount: 0,
+        totalAmount: 30000,
+        pinCode: '852914',
+        isP2PEnabled: true,
+        p2pRecipientPhone: '0909888777',
+        p2pRecipientName: 'Chị Mai Lan',
+        status: 'active',
+        isDoorOpen: false,
+      },
+    ];
+  });
+
+  // Valet orders list (khởi tạo từ LocalStorage để giữ nguyên Tủ Đồ Số Hóa sau khi reload/login)
+  const [valetOrders, setValetOrders] = useState<ValetOrder[]>(() => {
+    return supabaseService.getLocalValetOrders();
+  });
 
   const handleConfirmBooking = async (newBooking: LockerBooking) => {
-    setLockerBookings([newBooking, ...lockerBookings]);
+    const updated = [newBooking, ...lockerBookings];
+    setLockerBookings(updated);
     await supabaseService.createLockerBooking(newBooking);
   };
 
   const handleCreateValetOrder = async (newOrder: ValetOrder) => {
-    setValetOrders([newOrder, ...valetOrders]);
+    const updated = [newOrder, ...valetOrders];
+    setValetOrders(updated);
     await supabaseService.createValetOrder(newOrder);
   };
 
   const handleUpdateBooking = async (updated: LockerBooking) => {
-    setLockerBookings(lockerBookings.map((b) => (b.id === updated.id ? updated : b)));
+    const updatedList = lockerBookings.map((b) => (b.id === updated.id ? updated : b));
+    setLockerBookings(updatedList);
     await supabaseService.updateLockerBooking(updated.id, updated);
   };
 
