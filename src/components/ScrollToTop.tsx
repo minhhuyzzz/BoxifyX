@@ -32,10 +32,10 @@ export const ScrollToTop: React.FC = () => {
       type="button"
       onClick={scrollToTop}
       aria-label="Cuộn lên đầu trang"
-      className="fixed z-40 bottom-20 lg:bottom-6 right-20 lg:right-24 p-3.5 rounded-2xl bg-white/95 hover:bg-zinc-950 text-zinc-700 hover:text-white border border-zinc-200/90 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 group flex items-center justify-center backdrop-blur-md"
+      className="w-11 h-11 rounded-full bg-white hover:bg-zinc-950 text-zinc-700 hover:text-white border border-zinc-200/90 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center backdrop-blur-md"
       title="Cuộn lên đầu trang"
     >
-      <ArrowUp className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-0.5" />
+      <ArrowUp className="w-5 h-5 transition-transform duration-300 hover:-translate-y-0.5" />
     </button>
   );
 };

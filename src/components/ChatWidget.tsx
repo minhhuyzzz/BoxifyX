@@ -28,13 +28,14 @@ interface ChatWidgetProps {
   onNavigate?: (page: 'home' | 'locker' | 'valet' | 'closet' | 'pricing' | 'faq') => void;
 }
 
+import { ScrollToTop } from './ScrollToTop';
+
 export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'social'>('chat');
   const [inputText, setInputText] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [unreadBadge, setUnreadBadge] = useState<boolean>(true);
-  const [showSpeedDial, setShowSpeedDial] = useState<boolean>(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -209,63 +210,68 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
 
   return (
     <>
-      {/* Floating Speed Dial & Chat Button Group */}
-      <div className="fixed z-40 bottom-20 lg:bottom-6 right-4 lg:right-6 flex flex-col items-end gap-2.5">
-        {/* Speed dial popup items when hovered/clicked */}
-        {showSpeedDial && !isOpen && (
-          <div className="flex flex-col items-end gap-2 mb-1 animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <a
-              href="tel:19006868"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-lg text-xs font-bold transition-all hover:scale-105"
-            >
-              <Phone className="w-4 h-4" />
-              <span>Gọi 1900 6868</span>
-            </a>
-            <a
-              href="https://zalo.me/0909123456"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white shadow-lg text-xs font-bold transition-all hover:scale-105"
-            >
-              <span className="font-black text-xs">Zalo</span>
-              <span>Chat Zalo OA</span>
-            </a>
-          </div>
-        )}
+      {/* Unified Vertical Floating Action Dock */}
+      <div className="fixed z-40 bottom-20 lg:bottom-6 right-4 sm:right-6 flex flex-col items-center gap-2.5">
+        {/* 1. Scroll To Top Button (Tự động hiện khi lướt xuống, nằm đỉnh cột) */}
+        <ScrollToTop />
 
-        {/* Main Floating Trigger Button */}
-        {!isOpen && (
-          <div className="flex items-center gap-2">
-            {/* Quick Hotline icon button */}
-            <a
-              href="tel:19006868"
-              aria-label="Gọi hotline 1900 6868"
-              className="w-11 h-11 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300"
-              title="Hotline 24/7: 1900 6868"
-            >
-              <PhoneCall className="w-5 h-5 animate-pulse" />
-            </a>
+        {/* 2. Nút Mạng Xã Hội Đa Kênh (Zalo, Messenger, Telegram, TikTok) */}
+        <button
+          type="button"
+          onClick={() => {
+            setIsOpen(true);
+            setActiveTab('social');
+          }}
+          className="w-11 h-11 rounded-full bg-zinc-900 hover:bg-black text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 group"
+          title="Mạng xã hội & Kênh liên hệ (Zalo, Messenger, Telegram, TikTok...)"
+          aria-label="Kênh mạng xã hội"
+        >
+          <Share2 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+        </button>
 
-            {/* AI Chat Bubble Button */}
-            <button
-              type="button"
-              onClick={() => setIsOpen(true)}
-              className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 text-white shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group focus:outline-none"
-              aria-label="Mở khung chat hỗ trợ"
-            >
-              {/* Notification unread pulse */}
-              {unreadBadge && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
-                    1
-                  </span>
-                </span>
-              )}
-              <MessageSquare className="w-6 h-6 transition-transform group-hover:rotate-12" />
-            </button>
-          </div>
-        )}
+        {/* 3. Nút Chat Zalo OA Trực Tiếp 1-Chạm */}
+        <a
+          href="https://zalo.me/0909123456"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-11 h-11 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 font-extrabold text-[11px] tracking-tight"
+          title="Chat Zalo Official: 0909 123 456"
+          aria-label="Chat Zalo Official"
+        >
+          Zalo
+        </a>
+
+        {/* 4. Nút Gọi Hotline Khẩn Cấp 24/7 (1900 6868) */}
+        <a
+          href="tel:19006868"
+          aria-label="Gọi hotline 1900 6868"
+          className="w-11 h-11 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300"
+          title="Hotline 24/7: 1900 6868 (Khẩn cấp & Mở tủ)"
+        >
+          <PhoneCall className="w-5 h-5 animate-pulse" />
+        </a>
+
+        {/* 5. Nút Mở Khung Chat AI BoxifyX */}
+        <button
+          type="button"
+          onClick={() => {
+            setIsOpen(!isOpen);
+            if (!isOpen) setActiveTab('chat');
+          }}
+          className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 text-white shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group focus:outline-none"
+          aria-label="Mở khung chat hỗ trợ AI"
+          title="Trợ Lý AI BoxifyX 24/7"
+        >
+          {unreadBadge && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
+                1
+              </span>
+            </span>
+          )}
+          {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6 transition-transform group-hover:rotate-12" />}
+        </button>
       </div>
 
       {/* Chat Popover Window */}
