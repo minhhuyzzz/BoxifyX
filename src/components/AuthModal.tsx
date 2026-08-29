@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, Phone, User, ArrowRight, Sparkles, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { X, Mail, Lock, Phone, User, ArrowRight, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import confetti from 'canvas-confetti';
 
@@ -54,7 +54,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         });
 
         if (error) {
-          // If error from Supabase
           if (error.message.includes('already registered')) {
             setErrorMessage('Email này đã được đăng ký. Vui lòng chuyển sang tab Đăng Nhập.');
           } else {
@@ -130,31 +129,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Đã xảy ra lỗi kết nối máy chủ Supabase.');
+      setErrorMessage(err?.message || 'Đã xảy ra lỗi đăng nhập. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleQuickDemoLogin = (demoEmail: string, demoName: string) => {
-    const demoUser = {
-      id: 'usr-demo-888',
-      email: demoEmail,
-      fullName: demoName,
-      phone: '0908889999',
-    };
-    confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
-    onLoginSuccess(demoUser);
-    onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/75 backdrop-blur-md animate-fade-in overflow-y-auto">
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-zinc-200 overflow-hidden my-6">
         
-        {/* Top Gradient Banner */}
-        <div className="px-6 py-6 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white relative">
+        {/* Top Header Banner */}
+        <div className="px-6 py-6 bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-white relative text-left">
           <button
+            type="button"
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors"
           >
@@ -162,14 +150,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
 
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md">
+            <div className="w-12 h-12 rounded-2xl bg-white p-1 flex items-center justify-center shadow-md shrink-0">
               <img src="/logo.png" alt="BoxifyX" className="w-full h-full object-contain" />
             </div>
             <div>
               <h3 className="font-black text-lg text-white">
                 {mode === 'login' ? 'Đăng Nhập Tài Khoản' : 'Đăng Ký Thành Viên'}
               </h3>
-              <p className="text-xs text-amber-400">Kết nối bảo mật Supabase PostgreSQL</p>
+              <p className="text-xs text-zinc-400">Quản lý đơn hàng & tủ đồ cá nhân</p>
             </div>
           </div>
         </div>
@@ -230,7 +218,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="VD: Trần Minh Hoàng"
+                    placeholder="VD: Nguyễn Văn A"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 outline-none"
@@ -299,33 +287,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </>
             )}
           </button>
-
-          {/* Quick Demo Logins with real email formats */}
-          <div className="pt-3 border-t border-zinc-100 text-center space-y-2">
-            <span className="text-[11px] text-zinc-400 font-medium">Hoặc thử nghiệm nhanh 1-chạm:</span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin('alex.nguyen@boxifyx.vn', 'Alex Nguyễn')}
-                className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-[11px] font-bold transition-colors truncate"
-              >
-                alex.nguyen@boxifyx.vn
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin('mai.lan@gmail.com', 'Mai Lan')}
-                className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-[11px] font-bold transition-colors truncate"
-              >
-                mai.lan@gmail.com
-              </button>
-            </div>
-          </div>
         </form>
 
-        {/* Security Footer */}
+        {/* Security Note Footer */}
         <div className="p-3.5 bg-zinc-50 border-t border-zinc-200 text-center text-[11px] text-zinc-500 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Bảo mật Supabase Auth & Mã hóa SSL 256-bit</span>
+          <span>Cam kết bảo mật thông tin tài khoản & mã hóa dữ liệu</span>
         </div>
 
       </div>
