@@ -13,7 +13,10 @@ import {
   Share2,
   PhoneCall,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Settings,
+  Key,
+  Check
 } from 'lucide-react';
 import { askBoxifyAI, ChatMessageParam } from '../services/aiService';
 import { ScrollToTop } from './ScrollToTop';
@@ -37,6 +40,24 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
   const [inputText, setInputText] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [unreadBadge, setUnreadBadge] = useState<boolean>(true);
+  const [showApiKeyModal, setShowApiKeyModal] = useState<boolean>(false);
+  const [geminiKeyInput, setGeminiKeyInput] = useState<string>(() => {
+    return localStorage.getItem('boxifyx_gemini_api_key') || '';
+  });
+  const [isKeySaved, setIsKeySaved] = useState<boolean>(false);
+
+  const handleSaveApiKey = () => {
+    if (geminiKeyInput.trim()) {
+      localStorage.setItem('boxifyx_gemini_api_key', geminiKeyInput.trim());
+    } else {
+      localStorage.removeItem('boxifyx_gemini_api_key');
+    }
+    setIsKeySaved(true);
+    setTimeout(() => {
+      setIsKeySaved(false);
+      setShowApiKeyModal(false);
+    }, 1000);
+  };
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -322,6 +343,15 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
             </div>
 
             <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setShowApiKeyModal(!showApiKeyModal)}
+                className={`p-2 rounded-xl transition-colors ${showApiKeyModal ? 'bg-amber-500 text-white' : 'text-zinc-400 hover:text-amber-400 hover:bg-zinc-900'}`}
+                title="Cài đặt API Key (Google Gemini / OpenAI)"
+                aria-label="Cài đặt API Key"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
               <a
                 href="tel:0777868762"
                 className="p-2 rounded-xl text-zinc-400 hover:text-amber-400 hover:bg-zinc-900 transition-colors"
@@ -339,6 +369,44 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
               </button>
             </div>
           </div>
+
+          {/* Inline API Key Config Modal */}
+          {showApiKeyModal && (
+            <div className="p-4 bg-zinc-900 text-white border-b border-zinc-800 space-y-3 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Key className="w-4 h-4 text-amber-400" />
+                  <h4 className="font-extrabold text-xs text-white">Cấu Hình Google Gemini API</h4>
+                </div>
+                <span className="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full font-mono">
+                  100% Miễn Phí
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-normal">
+                Nhập Gemini API Key của bạn để trò chuyện trực tiếp qua Google Gemini 1.5 Flash. Key được lưu an toàn trong trình duyệt hoặc trong file <code className="text-amber-300 font-mono">.env</code> (<code className="text-amber-300 font-mono">VITE_GEMINI_API_KEY</code>).
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={geminiKeyInput}
+                  onChange={(e) => setGeminiKeyInput(e.target.value)}
+                  placeholder="Dán mã API Key (AIzaSy...)"
+                  className="flex-1 px-3 py-2 rounded-xl bg-zinc-950 border border-zinc-700 text-xs text-white focus:outline-none focus:border-amber-400 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveApiKey}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all flex items-center gap-1 shrink-0"
+                >
+                  {isKeySaved ? <Check className="w-3.5 h-3.5" /> : null}
+                  <span>{isKeySaved ? 'Đã lưu!' : 'Lưu Key'}</span>
+                </button>
+              </div>
+              <p className="text-[10px] text-zinc-400">
+                👉 Chưa có key? Lấy miễn phí tại: <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline hover:text-amber-300">Google AI Studio</a>
+              </p>
+            </div>
+          )}
 
           {/* Navigation Tabs (AI Chat vs Social Channels) */}
           <div className="flex border-b border-zinc-100 bg-zinc-50/80 px-2 pt-1 text-xs font-bold">
