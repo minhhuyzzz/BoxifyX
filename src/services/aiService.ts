@@ -54,11 +54,10 @@ export async function askBoxifyAI(userMessage: string, history: ChatMessageParam
   // 1. Thử gọi Google Gemini / Gemma API nếu có Key
   if (geminiApiKey) {
     const candidateModels = [
-      'gemini-1.5-flash',
+      'gemini-3.5-flash',
+      'gemini-flash-lite-latest',
       'gemma-4-26b-a4b-it',
-      'gemini-flash-latest',
-      'gemini-2.5-flash-lite',
-      'gemini-2.5-flash'
+      'gemini-1.5-flash'
     ];
 
     for (const model of candidateModels) {
