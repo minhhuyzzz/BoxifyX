@@ -321,7 +321,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
 
       {/* Chat Popover Window */}
       {isOpen && (
-        <div className="fixed z-50 bottom-20 lg:bottom-6 right-4 sm:right-6 w-[360px] sm:w-[420px] max-w-[calc(100vw-32px)] h-[580px] max-h-[calc(100vh-120px)] bg-white rounded-3xl border border-zinc-200/90 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed z-50 bottom-20 lg:bottom-6 inset-x-3 sm:inset-x-auto sm:right-6 w-auto sm:w-[420px] max-w-[calc(100vw-24px)] h-[580px] max-h-[calc(100vh-110px)] bg-white rounded-3xl border border-zinc-200/90 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
           {/* Header */}
           <div className="p-4 bg-zinc-950 text-white flex items-center justify-between border-b border-zinc-800">
             <div className="flex items-center gap-3">

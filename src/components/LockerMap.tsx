@@ -207,7 +207,7 @@ export const LockerMap: React.FC<LockerMapProps> = ({ stations = MOCK_STATIONS, 
         </div>
 
         {/* District Filter Buttons */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-1 max-w-full scrollbar-none">
+        <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-1 max-w-full no-scrollbar scroll-smooth">
           <span className="text-[11px] font-extrabold text-zinc-400 uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
             <SlidersHorizontal className="w-3 h-3" />
             <span>Quận / Huyện:</span>

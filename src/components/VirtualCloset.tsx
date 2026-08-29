@@ -347,7 +347,7 @@ export const VirtualCloset: React.FC<VirtualClosetProps> = ({
             </div>
 
             {/* Category Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 max-w-full">
+            <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 max-w-full no-scrollbar scroll-smooth">
               {predefinedCategories.map((c) => (
                 <button
                   key={c}
