@@ -57,11 +57,11 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-zinc-950 leading-[1.12]">
-              Không Gian Thênh Thang,{' '}
+              Dịch Vụ Lưu Trữ Valet &{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600">
-                Lưu Trữ Tự Động
+                Tủ Đồ Thông Minh
               </span>{' '}
-              Tại Sài Gòn
+              TP.HCM
             </h1>
 
             {/* Subtitle */}
@@ -190,8 +190,8 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
                   type="button"
                   onClick={() => setHeroTab('locker')}
                   className={`flex-1 py-2 px-4 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 ${heroTab === 'locker'
-                      ? 'bg-zinc-950 text-white shadow-sm'
-                      : 'text-zinc-600 hover:text-zinc-950'
+                    ? 'bg-zinc-950 text-white shadow-sm'
+                    : 'text-zinc-600 hover:text-zinc-950'
                     }`}
                 >
                   <Lock className="w-3.5 h-3.5 text-amber-400" />
@@ -202,8 +202,8 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
                   type="button"
                   onClick={() => setHeroTab('valet')}
                   className={`flex-1 py-2 px-4 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 ${heroTab === 'valet'
-                      ? 'bg-zinc-950 text-white shadow-sm'
-                      : 'text-zinc-600 hover:text-zinc-950'
+                    ? 'bg-zinc-950 text-white shadow-sm'
+                    : 'text-zinc-600 hover:text-zinc-950'
                     }`}
                 >
                   <Box className="w-3.5 h-3.5 text-orange-400" />
@@ -260,8 +260,8 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
                         type="button"
                         onClick={() => setQuickSize(s)}
                         className={`py-2 rounded-xl text-xs font-black transition-all ${quickSize === s
-                            ? 'bg-amber-500 text-white shadow-sm'
-                            : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                          ? 'bg-amber-500 text-white shadow-sm'
+                          : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
                           }`}
                       >
                         Size {s}
