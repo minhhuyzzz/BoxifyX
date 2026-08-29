@@ -12,7 +12,8 @@ import {
   User,
   Share2,
   PhoneCall,
-  SendHorizontal
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { askBoxifyAI, ChatMessageParam } from '../services/aiService';
 
@@ -28,10 +29,9 @@ interface ChatWidgetProps {
   onNavigate?: (page: 'home' | 'locker' | 'valet' | 'closet' | 'pricing' | 'faq') => void;
 }
 
-import { ScrollToTop } from './ScrollToTop';
-
 export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isSocialExpanded, setIsSocialExpanded] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'social'>('chat');
   const [inputText, setInputText] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -47,6 +47,18 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const speedDialRef = useRef<HTMLDivElement>(null);
+
+  // Close speed dial when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (speedDialRef.current && !speedDialRef.current.contains(event.target as Node)) {
+        setIsSocialExpanded(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -55,37 +67,31 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
     }
   }, [isOpen, messages, isTyping, activeTab]);
 
-  const socialLinks = [
+  const socialChannels = [
     {
       name: 'Hotline 24/7',
-      desc: '1900 6868 (Khẩn cấp & Mở tủ)',
+      desc: '1900 6868 (Gọi khẩn cấp)',
       href: 'tel:19006868',
       color: 'bg-red-500 hover:bg-red-600 text-white',
-      badge: 'Miễn phí',
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-        </svg>
-      ),
+      badge: '1900 6868',
+      icon: <Phone className="w-4 h-4" />,
     },
     {
       name: 'Zalo Official Account',
-      desc: 'Tư vấn trực tiếp qua Zalo',
+      desc: '0909 123 456 (Chat tư vấn)',
       href: 'https://zalo.me/0909123456',
       color: 'bg-blue-500 hover:bg-blue-600 text-white',
-      badge: 'Phản hồi nhanh',
-      icon: (
-        <span className="font-extrabold text-sm tracking-tighter">Zalo</span>
-      ),
+      badge: 'Zalo',
+      icon: <span className="font-black text-xs">Zalo</span>,
     },
     {
       name: 'Facebook Messenger',
       desc: 'm.me/boxifyx.vn',
       href: 'https://m.me/boxifyx.vn',
       color: 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-pink-500 text-white',
-      badge: 'Trực tuyến',
+      badge: 'Messenger',
       icon: (
-        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
           <path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.19 5.43 3.12 7.15.16.14.26.35.26.57v2.18c0 .54.55.91 1.05.7l2.42-1.03c.18-.08.38-.1.57-.05.82.23 1.69.35 2.58.35 5.64 0 10-4.13 10-9.7S17.64 2 12 2zm1.09 13.07l-2.67-2.85-5.21 2.85c-.38.21-.82-.21-.63-.6l5.7-8.08c.28-.39.86-.41 1.16-.03l2.68 2.84 5.2-2.84c.38-.21.82.21.63.6l-5.69 8.08c-.28.4-.87.42-1.17.03z" />
         </svg>
       ),
@@ -95,21 +101,21 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
       desc: '@boxifyx_support',
       href: 'https://t.me/boxifyx_support',
       color: 'bg-sky-500 hover:bg-sky-600 text-white',
-      badge: 'Bảo mật',
+      badge: 'Telegram',
       icon: (
-        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z" />
         </svg>
       ),
     },
     {
-      name: 'Kênh TikTok BoxifyX',
-      desc: '@boxifyx.vn (Review trạm & kho)',
+      name: 'TikTok BoxifyX',
+      desc: '@boxifyx.vn',
       href: 'https://tiktok.com/@boxifyx.vn',
       color: 'bg-zinc-900 hover:bg-zinc-800 text-white',
-      badge: 'Video hướng dẫn',
+      badge: 'TikTok',
       icon: (
-        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
           <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 00-1-.08A6.34 6.34 0 003 15.66a6.34 6.34 0 0010.82 4.47 6.27 6.27 0 001.95-4.47V8.08a8.27 8.27 0 004.82 1.55v-3.43a4.84 4.84 0 01-1-.51z" />
         </svg>
       ),
@@ -150,14 +156,12 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
     if (!textToSend) setInputText('');
     setIsTyping(true);
 
-    // Build context history for AI
     const historyParams: ChatMessageParam[] = messages.slice(-4).map((m) => ({
       role: m.sender === 'user' ? 'user' : 'assistant',
       content: m.text,
     }));
 
     try {
-      // Call Real AI API Service
       const aiReply = await askBoxifyAI(query, historyParams);
 
       let targetPage: 'home' | 'locker' | 'valet' | 'closet' | 'pricing' | 'faq' | undefined;
@@ -210,48 +214,59 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
 
   return (
     <>
-      {/* Unified Vertical Floating Action Dock */}
-      <div className="fixed z-40 bottom-20 lg:bottom-6 right-4 sm:right-6 flex flex-col items-center gap-2.5">
-        {/* 1. Scroll To Top Button (Tự động hiện khi lướt xuống, nằm đỉnh cột) */}
-        <ScrollToTop />
+      {/* Floating Action Controls Dock (Bottom Right) */}
+      <div className="fixed z-40 bottom-20 lg:bottom-6 right-4 sm:right-6 flex items-center gap-3">
+        {/* Expandable Social & Hotline Speed Dial */}
+        <div ref={speedDialRef} className="relative flex flex-col items-center">
+          {/* Expanded Channels Popup List */}
+          {isSocialExpanded && (
+            <div className="absolute bottom-14 right-0 mb-2 w-52 bg-white/95 backdrop-blur-xl rounded-3xl border border-zinc-200/90 shadow-2xl p-2.5 space-y-1.5 animate-in fade-in zoom-in-95 duration-200">
+              <div className="px-2 py-1 border-b border-zinc-100 flex items-center justify-between">
+                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
+                  Kênh Kết Nối 24/7
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              </div>
 
-        {/* 2. Nút Mạng Xã Hội Đa Kênh (Zalo, Messenger, Telegram, TikTok) */}
-        <button
-          type="button"
-          onClick={() => {
-            setIsOpen(true);
-            setActiveTab('social');
-          }}
-          className="w-11 h-11 rounded-full bg-zinc-900 hover:bg-black text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 group"
-          title="Mạng xã hội & Kênh liên hệ (Zalo, Messenger, Telegram, TikTok...)"
-          aria-label="Kênh mạng xã hội"
-        >
-          <Share2 className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-        </button>
+              {socialChannels.map((ch, idx) => (
+                <a
+                  key={idx}
+                  href={ch.href}
+                  target={ch.href.startsWith('tel:') ? '_self' : '_blank'}
+                  rel="noopener noreferrer"
+                  onClick={() => setIsSocialExpanded(false)}
+                  className="flex items-center gap-2.5 p-2 rounded-2xl hover:bg-zinc-100/80 transition-all duration-150 group"
+                >
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${ch.color} shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
+                    {ch.icon}
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-xs font-extrabold text-zinc-900 group-hover:text-amber-600 transition-colors truncate">
+                      {ch.name}
+                    </p>
+                    <p className="text-[10px] text-zinc-500 truncate">{ch.desc}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
 
-        {/* 3. Nút Chat Zalo OA Trực Tiếp 1-Chạm */}
-        <a
-          href="https://zalo.me/0909123456"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-11 h-11 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 font-extrabold text-[11px] tracking-tight"
-          title="Chat Zalo Official: 0909 123 456"
-          aria-label="Chat Zalo Official"
-        >
-          Zalo
-        </a>
+          {/* Social Channels Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setIsSocialExpanded(!isSocialExpanded)}
+            className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 ${isSocialExpanded
+              ? 'bg-zinc-950 text-white rotate-45'
+              : 'bg-zinc-900 hover:bg-black text-white'
+              }`}
+            title="Mở mạng xã hội & Hotline (Zalo, Messenger, Telegram, TikTok, Hotline)"
+            aria-label="Mạng xã hội và Hotline"
+          >
+            {isSocialExpanded ? <X className="w-5 h-5" /> : <Share2 className="w-5 h-5" />}
+          </button>
+        </div>
 
-        {/* 4. Nút Gọi Hotline Khẩn Cấp 24/7 (1900 6868) */}
-        <a
-          href="tel:19006868"
-          aria-label="Gọi hotline 1900 6868"
-          className="w-11 h-11 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300"
-          title="Hotline 24/7: 1900 6868 (Khẩn cấp & Mở tủ)"
-        >
-          <PhoneCall className="w-5 h-5 animate-pulse" />
-        </a>
-
-        {/* 5. Nút Mở Khung Chat AI BoxifyX */}
+        {/* AI Chat Bubble Trigger Button */}
         <button
           type="button"
           onClick={() => {
@@ -276,7 +291,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
 
       {/* Chat Popover Window */}
       {isOpen && (
-        <div className="fixed z-50 bottom-20 lg:bottom-6 right-4 lg:right-6 w-[360px] sm:w-[420px] max-w-[calc(100vw-32px)] h-[580px] max-h-[calc(100vh-120px)] bg-white rounded-3xl border border-zinc-200/90 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed z-50 bottom-20 lg:bottom-6 right-4 sm:right-6 w-[360px] sm:w-[420px] max-w-[calc(100vw-32px)] h-[580px] max-h-[calc(100vh-120px)] bg-white rounded-3xl border border-zinc-200/90 shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
           {/* Header */}
           <div className="p-4 bg-zinc-950 text-white flex items-center justify-between border-b border-zinc-800">
             <div className="flex items-center gap-3">
@@ -469,7 +484,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
               </div>
 
               <div className="space-y-2.5">
-                {socialLinks.map((item, idx) => (
+                {socialChannels.map((item, idx) => (
                   <a
                     key={idx}
                     href={item.href}

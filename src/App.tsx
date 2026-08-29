@@ -15,6 +15,7 @@ import { LockerBookingModal } from './components/LockerBookingModal';
 import { LockerUnlockModal } from './components/LockerUnlockModal';
 import { ActiveBookingsDrawer } from './components/ActiveBookingsDrawer';
 import { ChatWidget } from './components/ChatWidget';
+import { ScrollToTop } from './components/ScrollToTop';
 import { LockerStation, LockerBooking, ValetOrder } from './types';
 import { MOCK_STATIONS } from './data/mockData';
 import { supabaseService } from './services/supabaseService';
@@ -301,7 +302,10 @@ export function App() {
       {/* Footer with active navigation */}
       <Footer onNavigate={handleNavigate} />
 
-      {/* Floating Smart AI Chat Widget with Integrated Vertical Dock */}
+      {/* Floating Scroll To Top Button (Vị trí gốc độc lập) */}
+      <ScrollToTop />
+
+      {/* Floating Smart AI Chat Widget & Thu/Mở Mạng Xã Hội */}
       <ChatWidget onNavigate={handleNavigate} />
 
       {/* Modern iOS / Android Bottom Tab Navigation for Mobile Viewports */}
