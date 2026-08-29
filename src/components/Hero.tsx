@@ -55,13 +55,15 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
               <span>Nền Tảng Lưu Trữ Kỹ Thuật Số • 27 Trạm Toàn TP.HCM</span>
             </div>
 
-            {/* Main Headline: Giãn cách dòng thoáng đãng, không bị dính dấu tiếng Việt */}
-            <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-black text-zinc-950 leading-[1.32] tracking-normal">
-              Dịch Vụ Lưu Trữ Valet &{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 inline-block py-0.5">
-                Tủ Đồ Thông Minh
-              </span>{' '}
-              TP.HCM
+            {/* Main Headline */}
+            <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-black text-zinc-950 leading-[1.35] tracking-normal space-y-2">
+              <span className="block">Dịch Vụ Lưu Trữ Valet &</span>
+              <span className="block">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 inline-block py-1 pr-1">
+                  Tủ Đồ Thông Minh
+                </span>{' '}
+                <span className="text-zinc-950 inline-block">TP.HCM</span>
+              </span>
             </h1>
 
             {/* Subtitle */}
