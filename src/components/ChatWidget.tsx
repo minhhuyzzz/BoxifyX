@@ -16,6 +16,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { askBoxifyAI, ChatMessageParam } from '../services/aiService';
+import { ScrollToTop } from './ScrollToTop';
 
 interface ChatMessage {
   id: string;
@@ -70,16 +71,16 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
   const socialChannels = [
     {
       name: 'Hotline 24/7',
-      desc: '1900 6868 (Gọi khẩn cấp)',
-      href: 'tel:19006868',
+      desc: '0777 868 762 (Gọi khẩn cấp)',
+      href: 'tel:0777868762',
       color: 'bg-red-500 hover:bg-red-600 text-white',
-      badge: '1900 6868',
+      badge: '0777 868 762',
       icon: <Phone className="w-4 h-4" />,
     },
     {
       name: 'Zalo Official Account',
-      desc: '0909 123 456 (Chat tư vấn)',
-      href: 'https://zalo.me/0909123456',
+      desc: '0777 868 762 (Chat tư vấn)',
+      href: 'https://zalo.me/0777868762',
       color: 'bg-blue-500 hover:bg-blue-600 text-white',
       badge: 'Zalo',
       icon: <span className="font-black text-xs">Zalo</span>,
@@ -215,78 +216,86 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
   return (
     <>
       {/* Floating Action Controls Dock (Bottom Right) */}
-      <div className="fixed z-40 bottom-20 lg:bottom-6 right-4 sm:right-6 flex items-center gap-3">
-        {/* Expandable Social & Hotline Speed Dial */}
-        <div ref={speedDialRef} className="relative flex flex-col items-center">
-          {/* Expanded Channels Popup List */}
-          {isSocialExpanded && (
-            <div className="absolute bottom-14 right-0 mb-2 w-52 bg-white/95 backdrop-blur-xl rounded-3xl border border-zinc-200/90 shadow-2xl p-2.5 space-y-1.5 animate-in fade-in zoom-in-95 duration-200">
-              <div className="px-2 py-1 border-b border-zinc-100 flex items-center justify-between">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
-                  Kênh Kết Nối 24/7
-                </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              </div>
-
-              {socialChannels.map((ch, idx) => (
-                <a
-                  key={idx}
-                  href={ch.href}
-                  target={ch.href.startsWith('tel:') ? '_self' : '_blank'}
-                  rel="noopener noreferrer"
-                  onClick={() => setIsSocialExpanded(false)}
-                  className="flex items-center gap-2.5 p-2 rounded-2xl hover:bg-zinc-100/80 transition-all duration-150 group"
-                >
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${ch.color} shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
-                    {ch.icon}
-                  </div>
-                  <div className="overflow-hidden">
-                    <p className="text-xs font-extrabold text-zinc-900 group-hover:text-amber-600 transition-colors truncate">
-                      {ch.name}
-                    </p>
-                    <p className="text-[10px] text-zinc-500 truncate">{ch.desc}</p>
-                  </div>
-                </a>
-              ))}
-            </div>
-          )}
-
-          {/* Social Channels Toggle Button */}
-          <button
-            type="button"
-            onClick={() => setIsSocialExpanded(!isSocialExpanded)}
-            className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 ${isSocialExpanded
-              ? 'bg-zinc-950 text-white rotate-45'
-              : 'bg-zinc-900 hover:bg-black text-white'
-              }`}
-            title="Mở mạng xã hội & Hotline (Zalo, Messenger, Telegram, TikTok, Hotline)"
-            aria-label="Mạng xã hội và Hotline"
-          >
-            {isSocialExpanded ? <X className="w-5 h-5" /> : <Share2 className="w-5 h-5" />}
-          </button>
+      <div className="fixed z-40 bottom-20 lg:bottom-6 right-4 sm:right-6 flex flex-col items-end gap-3 pointer-events-none">
+        {/* 1. Scroll To Top Button (Nằm trực tiếp ngay TRÊN nút Chat AI) */}
+        <div className="pointer-events-auto">
+          <ScrollToTop />
         </div>
 
-        {/* AI Chat Bubble Trigger Button */}
-        <button
-          type="button"
-          onClick={() => {
-            setIsOpen(!isOpen);
-            if (!isOpen) setActiveTab('chat');
-          }}
-          className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 text-white shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group focus:outline-none"
-          aria-label="Mở khung chat hỗ trợ AI"
-          title="Trợ Lý AI BoxifyX 24/7"
-        >
-          {unreadBadge && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
-                1
+        {/* 2. Hàng điều khiển bên dưới: Menu Mạng Xã Hội Thu/Mở + Bong Bóng Chat AI */}
+        <div className="flex items-center gap-3 pointer-events-auto">
+          {/* Expandable Social & Hotline Speed Dial */}
+          <div ref={speedDialRef} className="relative flex flex-col items-center">
+            {/* Expanded Channels Popup List */}
+            {isSocialExpanded && (
+              <div className="absolute bottom-14 right-0 mb-2 w-52 bg-white/95 backdrop-blur-xl rounded-3xl border border-zinc-200/90 shadow-2xl p-2.5 space-y-1.5 animate-in fade-in zoom-in-95 duration-200">
+                <div className="px-2 py-1 border-b border-zinc-100 flex items-center justify-between">
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
+                    Kênh Kết Nối 24/7
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                </div>
+
+                {socialChannels.map((ch, idx) => (
+                  <a
+                    key={idx}
+                    href={ch.href}
+                    target={ch.href.startsWith('tel:') ? '_self' : '_blank'}
+                    rel="noopener noreferrer"
+                    onClick={() => setIsSocialExpanded(false)}
+                    className="flex items-center gap-2.5 p-2 rounded-2xl hover:bg-zinc-100/80 transition-all duration-150 group"
+                  >
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${ch.color} shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
+                      {ch.icon}
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="text-xs font-extrabold text-zinc-900 group-hover:text-amber-600 transition-colors truncate">
+                        {ch.name}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 truncate">{ch.desc}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+
+            {/* Social Channels Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsSocialExpanded(!isSocialExpanded)}
+              className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-300 ${isSocialExpanded
+                ? 'bg-zinc-950 text-white rotate-45'
+                : 'bg-zinc-900 hover:bg-black text-white'
+                }`}
+              title="Mở mạng xã hội & Hotline (Zalo, Messenger, Telegram, TikTok, Hotline)"
+              aria-label="Mạng xã hội và Hotline"
+            >
+              {isSocialExpanded ? <X className="w-5 h-5" /> : <Share2 className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* AI Chat Bubble Trigger Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsOpen(!isOpen);
+              if (!isOpen) setActiveTab('chat');
+            }}
+            className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-600 text-white shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 transition-all duration-300 group focus:outline-none"
+            aria-label="Mở khung chat hỗ trợ AI"
+            title="Trợ Lý AI BoxifyX 24/7"
+          >
+            {unreadBadge && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
+                  1
+                </span>
               </span>
-            </span>
-          )}
-          {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6 transition-transform group-hover:rotate-12" />}
-        </button>
+            )}
+            {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6 transition-transform group-hover:rotate-12" />}
+          </button>
+        </div>
       </div>
 
       {/* Chat Popover Window */}
