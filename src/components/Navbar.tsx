@@ -98,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
             >
 
-              <span>Smart Locker</span>
+              <span>Trạm tủ</span>
             </button>
 
             <button
