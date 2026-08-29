@@ -158,20 +158,38 @@ export const ValetStorageSection: React.FC<ValetStorageSectionProps> = ({
 
       const orderCode = `VO-${Date.now().toString().slice(-6)}`;
 
-      // Automatically generate placeholder items for the user's Digital Closet
+      // Automatically generate items for both Standard Boxes and Large Items for Digital Closet
       const initialValetItems: ValetItem[] = [];
+
+      // 1. Standard Boxes ($120k/month)
       for (let i = 1; i <= standardBoxes; i++) {
         initialValetItems.push({
-          id: `item-${Date.now()}-${i}`,
+          id: `item-${Date.now()}-std-${i}`,
           boxCode: `BX-STD-${Math.floor(1000 + Math.random() * 8999)}`,
-          title: `Thùng Standard #${i} (${customerName})`,
+          title: `Thùng Standard #${i} (60x40x40cm) - ${customerName}`,
           itemType: 'standard_box',
-          description: storageItemNotes.trim() || 'Đang chuẩn bị giao thùng rỗng & niêm phong',
+          description: storageItemNotes.trim() || 'Đang chuẩn bị giao thùng rỗng tiêu chuẩn & chốt niêm phong',
           sealNumber: `SEAL-HCM-${Math.floor(1000 + Math.random() * 8999)}`,
           warehouseBin: `KHO1-C-0${i}-S1`,
           imageUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&auto=format&fit=crop&q=80',
           storedDate: new Date().toLocaleDateString('vi-VN'),
-          category: 'Thời trang & Quần áo',
+          category: 'Thùng Tiêu Chuẩn',
+        });
+      }
+
+      // 2. Large Items / Oversized Pallet ($200k/month)
+      for (let j = 1; j <= largeItems; j++) {
+        initialValetItems.push({
+          id: `item-${Date.now()}-lrg-${j}`,
+          boxCode: `BX-LRG-${Math.floor(1000 + Math.random() * 8999)}`,
+          title: `Kiện Quá Khổ #${j} (Pallet/Thiết Bị) - ${customerName}`,
+          itemType: 'large_item',
+          description: storageItemNotes.trim() || 'Lưu trữ pallet bảo quản nhiệt độ 25°C, độ ẩm <50%',
+          sealNumber: `SEAL-HCM-${Math.floor(1000 + Math.random() * 8999)}`,
+          warehouseBin: `KHO1-ZONE-LARGE-0${j}`,
+          imageUrl: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&auto=format&fit=crop&q=80',
+          storedDate: new Date().toLocaleDateString('vi-VN'),
+          category: 'Kiện Quá Khổ',
         });
       }
 

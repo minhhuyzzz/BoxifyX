@@ -119,7 +119,7 @@ export const supabaseService = {
         .order('created_at', { ascending: false });
 
       if (error || !data || data.length === 0) {
-        return MOCK_DEFAULT_VALET_ITEMS;
+        return [];
       }
 
       return data.map((item) => ({
@@ -135,7 +135,7 @@ export const supabaseService = {
         category: item.category || 'Thời trang',
       }));
     } catch {
-      return MOCK_DEFAULT_VALET_ITEMS;
+      return [];
     }
   },
 

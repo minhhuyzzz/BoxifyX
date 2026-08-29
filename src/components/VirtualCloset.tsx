@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ValetItem, ValetOrder } from '../types';
-import { MOCK_DEFAULT_VALET_ITEMS } from '../data/mockData';
 import {
   Sparkles,
   Search,
@@ -52,22 +51,14 @@ export const VirtualCloset: React.FC<VirtualClosetProps> = ({
   // Active Tab inside Closet: 'items' (Individual boxes) vs 'orders' (Full Valet Orders)
   const [closetViewMode, setClosetViewMode] = useState<'items' | 'orders'>('items');
 
-  // Combine user's live ordered items with initial mock items
+  // Derive closet items purely from user's live valetOrders (no hardcoded mock items)
   const [closetItems, setClosetItems] = useState<ValetItem[]>(() => {
-    const liveItems = valetOrders.flatMap((order) => order.items || []);
-    if (liveItems.length > 0) {
-      return [...liveItems, ...MOCK_DEFAULT_VALET_ITEMS];
-    }
-    return MOCK_DEFAULT_VALET_ITEMS;
+    return valetOrders.flatMap((order) => order.items || []);
   });
 
   useEffect(() => {
     const liveItems = valetOrders.flatMap((order) => order.items || []);
-    if (liveItems.length > 0) {
-      const existingIds = new Set(liveItems.map((i) => i.id));
-      const filteredMocks = MOCK_DEFAULT_VALET_ITEMS.filter((m) => !existingIds.has(m.id));
-      setClosetItems([...liveItems, ...filteredMocks]);
-    }
+    setClosetItems(liveItems);
   }, [valetOrders]);
 
   const [searchQuery, setSearchQuery] = useState<string>('');

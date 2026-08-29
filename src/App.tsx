@@ -146,28 +146,8 @@ export function App() {
     },
   ]);
 
-  // Valet orders list
-  const [valetOrders, setValetOrders] = useState<ValetOrder[]>([
-    {
-      id: 'VO-8812',
-      customerName: 'Trần Minh Hoàng',
-      customerPhone: '0933112233',
-      pickupAddress: '45 Lê Duẩn, P. Bến Nghé, Quận 1',
-      pickupLat: 10.7801,
-      pickupLng: 106.6998,
-      distanceKm: 7.5,
-      standardBoxesCount: 2,
-      largeItemsCount: 1,
-      monthlyStorageFee: 440000,
-      shippingFee: 30000,
-      totalFirstMonth: 470000,
-      stepStatus: 'empty_box_scheduled',
-      emptyBoxDeliveryDate: '30/08/2026',
-      packedPickupDate: '01/09/2026',
-      items: [],
-      createdAt: '29/08/2026',
-    },
-  ]);
+  // Valet orders list (empty initial state, populated upon live customer booking or Supabase sync)
+  const [valetOrders, setValetOrders] = useState<ValetOrder[]>([]);
 
   const handleConfirmBooking = async (newBooking: LockerBooking) => {
     setLockerBookings([newBooking, ...lockerBookings]);
