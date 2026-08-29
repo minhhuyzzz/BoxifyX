@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, Phone, User, ArrowRight, ShieldCheck } from 'lucide-react';
+import { X, Mail, Lock, Phone, User, ArrowRight, ShieldCheck, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import confetti from 'canvas-confetti';
 
@@ -16,7 +16,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onLoginSuccess,
   initialNotice,
 }) => {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [fullName, setFullName] = useState<string>('');
@@ -34,6 +34,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setSuccessMessage('');
 
     try {
+      if (mode === 'forgot') {
+        if (!email) {
+          setErrorMessage('Vui lòng nhập địa chỉ email để khôi phục mật khẩu.');
+          setIsLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: window.location.origin,
+        });
+
+        if (error) {
+          setErrorMessage(`Lỗi gửi yêu cầu: ${error.message}`);
+          setIsLoading(false);
+          return;
+        }
+
+        setSuccessMessage(`Đã gửi liên kết khôi phục mật khẩu đến email ${email.trim()}. Vui lòng kiểm tra hộp thư đến (hoặc thư rác).`);
+        setIsLoading(false);
+        return;
+      }
+
       if (mode === 'register') {
         if (!email || !password || !fullName || !phone) {
           setErrorMessage('Vui lòng điền đầy đủ các thông tin bắt buộc.');
@@ -129,7 +151,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Đã xảy ra lỗi đăng nhập. Vui lòng thử lại.');
+      setErrorMessage(err?.message || 'Đã xảy ra lỗi kết nối. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -155,9 +177,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
             <div>
               <h3 className="font-black text-lg text-white">
-                {mode === 'login' ? 'Đăng Nhập Tài Khoản' : 'Đăng Ký Thành Viên'}
+                {mode === 'login' && 'Đăng Nhập Tài Khoản'}
+                {mode === 'register' && 'Đăng Ký Thành Viên'}
+                {mode === 'forgot' && 'Khôi Phục Mật Khẩu'}
               </h3>
-              <p className="text-xs text-zinc-400">Quản lý đơn hàng & tủ đồ cá nhân</p>
+              <p className="text-xs text-zinc-400">
+                {mode === 'forgot'
+                  ? 'Nhập email để nhận liên kết đặt lại mật khẩu'
+                  : 'Quản lý đơn hàng & tủ đồ cá nhân'}
+              </p>
             </div>
           </div>
         </div>
@@ -169,31 +197,48 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* Tab Switcher */}
-        <div className="flex border-b border-zinc-200 bg-zinc-50">
-          <button
-            type="button"
-            onClick={() => { setMode('login'); setErrorMessage(''); setSuccessMessage(''); }}
-            className={`flex-1 py-3.5 text-xs font-black uppercase tracking-wider transition-all ${
-              mode === 'login'
-                ? 'text-zinc-950 border-b-2 border-amber-500 bg-white'
-                : 'text-zinc-400 hover:text-zinc-700'
-            }`}
-          >
-            Đăng Nhập
-          </button>
-          <button
-            type="button"
-            onClick={() => { setMode('register'); setErrorMessage(''); setSuccessMessage(''); }}
-            className={`flex-1 py-3.5 text-xs font-black uppercase tracking-wider transition-all ${
-              mode === 'register'
-                ? 'text-zinc-950 border-b-2 border-amber-500 bg-white'
-                : 'text-zinc-400 hover:text-zinc-700'
-            }`}
-          >
-            Đăng Ký Mới
-          </button>
-        </div>
+        {/* Tab Switcher (Show when in Login or Register mode) */}
+        {mode !== 'forgot' ? (
+          <div className="flex border-b border-zinc-200 bg-zinc-50">
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setErrorMessage(''); setSuccessMessage(''); }}
+              className={`flex-1 py-3.5 text-xs font-black uppercase tracking-wider transition-all ${
+                mode === 'login'
+                  ? 'text-zinc-950 border-b-2 border-amber-500 bg-white'
+                  : 'text-zinc-400 hover:text-zinc-700'
+              }`}
+            >
+              Đăng Nhập
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMode('register'); setErrorMessage(''); setSuccessMessage(''); }}
+              className={`flex-1 py-3.5 text-xs font-black uppercase tracking-wider transition-all ${
+                mode === 'register'
+                  ? 'text-zinc-950 border-b-2 border-amber-500 bg-white'
+                  : 'text-zinc-400 hover:text-zinc-700'
+              }`}
+            >
+              Đăng Ký Mới
+            </button>
+          </div>
+        ) : (
+          <div className="px-6 py-3 bg-amber-50/60 border-b border-amber-200 flex items-center justify-between text-xs">
+            <span className="font-bold text-amber-900 flex items-center gap-1.5">
+              <KeyRound className="w-4 h-4 text-amber-600" />
+              <span>Quên Mật Khẩu</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setErrorMessage(''); setSuccessMessage(''); }}
+              className="text-amber-700 hover:text-amber-900 font-extrabold flex items-center gap-1 hover:underline"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Quay lại</span>
+            </button>
+          </div>
+        )}
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-left">
@@ -204,8 +249,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           {successMessage && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium">
-              {successMessage}
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <span>{successMessage}</span>
             </div>
           )}
 
@@ -258,20 +304,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 mb-1">Mật Khẩu:</label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 outline-none"
-              />
+          {mode !== 'forgot' && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-zinc-700">Mật Khẩu:</label>
+                {mode === 'login' && (
+                  <button
+                    type="button"
+                    onClick={() => { setMode('forgot'); setErrorMessage(''); setSuccessMessage(''); }}
+                    className="text-[11px] font-bold text-amber-600 hover:text-amber-700 hover:underline"
+                  >
+                    Quên mật khẩu?
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 outline-none"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <button
             type="submit"
@@ -282,11 +341,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                <span>{mode === 'login' ? 'Đăng Nhập Ngay' : 'Hoàn Tất Đăng Ký'}</span>
+                <span>
+                  {mode === 'login' && 'Đăng Nhập Ngay'}
+                  {mode === 'register' && 'Hoàn Tất Đăng Ký'}
+                  {mode === 'forgot' && 'Gửi Liên Kết Đặt Lại Mật Khẩu'}
+                </span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
+
+          {mode === 'forgot' && (
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setErrorMessage(''); setSuccessMessage(''); }}
+                className="text-xs font-bold text-zinc-600 hover:text-zinc-950 inline-flex items-center gap-1 hover:underline"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Quay lại màn hình Đăng Nhập</span>
+              </button>
+            </div>
+          )}
         </form>
 
         {/* Security Note Footer */}
