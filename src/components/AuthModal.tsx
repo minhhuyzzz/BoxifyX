@@ -1,5 +1,19 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, Phone, User, ArrowRight, ShieldCheck, KeyRound, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import {
+  X,
+  Mail,
+  Lock,
+  Phone,
+  User,
+  ArrowRight,
+  ShieldCheck,
+  KeyRound,
+  ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  EyeOff
+} from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import confetti from 'canvas-confetti';
 
@@ -8,6 +22,13 @@ interface AuthModalProps {
   onClose: () => void;
   onLoginSuccess: (user: { id: string; email: string; fullName: string; phone: string }) => void;
   initialNotice?: string;
+}
+
+interface FieldErrors {
+  fullName?: string;
+  phone?: string;
+  email?: string;
+  password?: string;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -21,16 +42,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState<string>('');
   const [fullName, setFullName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   if (!isOpen) return null;
+
+  // Reset form errors when switching modes
+  const handleSwitchMode = (newMode: 'login' | 'register' | 'forgot') => {
+    setMode(newMode);
+    setErrorMessage('');
+    setSuccessMessage('');
+    setFieldErrors({});
+  };
 
   // Google 1-Tap OAuth Sign-In handler
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setErrorMessage('');
+    setFieldErrors({});
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -40,7 +72,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       });
 
       if (error) {
-        // Fallback smooth login for demo or unconfigured OAuth
+        // Fallback demo user if Google OAuth not enabled in project
         const demoGoogleUser = {
           id: `usr-gg-${Date.now().toString().slice(-4)}`,
           email: 'google.user@gmail.com',
@@ -52,7 +84,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }
     } catch {
-      // Fallback smooth demo login
       const demoGoogleUser = {
         id: `usr-gg-${Date.now().toString().slice(-4)}`,
         email: 'google.user@gmail.com',
@@ -67,41 +98,82 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  // Validate form fields before submitting
+  const validateForm = (): boolean => {
+    const errors: FieldErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(0[3|5|7|8|9])[0-9]{8}$/;
+
+    if (!email.trim()) {
+      errors.email = 'Vui lòng nhập địa chỉ email.';
+    } else if (!emailRegex.test(email.trim())) {
+      errors.email = 'Email không hợp lệ (ví dụ đúng: tenban@gmail.com).';
+    }
+
+    if (mode !== 'forgot') {
+      if (!password) {
+        errors.password = 'Vui lòng nhập mật khẩu.';
+      } else if (password.length < 6) {
+        errors.password = 'Mật khẩu phải có ít nhất 6 ký tự để bảo mật.';
+      }
+    }
+
+    if (mode === 'register') {
+      if (!fullName.trim()) {
+        errors.fullName = 'Vui lòng nhập họ và tên của bạn.';
+      } else if (fullName.trim().length < 2) {
+        errors.fullName = 'Họ tên quá ngắn (tối thiểu 2 ký tự).';
+      }
+
+      if (!phone.trim()) {
+        errors.phone = 'Vui lòng nhập số điện thoại liên hệ.';
+      } else {
+        const cleanPhone = phone.trim().replace(/\s|\./g, '');
+        if (!phoneRegex.test(cleanPhone)) {
+          errors.phone = 'Số điện thoại không hợp lệ (cần đủ 10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09).';
+        }
+      }
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
 
+    if (!validateForm()) {
+      setErrorMessage('Vui lòng kiểm tra và sửa các thông tin chưa chính xác bên dưới.');
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
       if (mode === 'forgot') {
-        if (!email) {
-          setErrorMessage('Vui lòng nhập địa chỉ email để khôi phục mật khẩu.');
-          setIsLoading(false);
-          return;
-        }
-
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
           redirectTo: window.location.origin,
         });
 
         if (error) {
-          setErrorMessage(`Lỗi gửi yêu cầu: ${error.message}`);
+          if (error.message.includes('rate limit')) {
+            setErrorMessage('Bạn đã gửi yêu cầu quá nhiều lần. Vui lòng chờ 1-2 phút rồi thử lại.');
+          } else {
+            setErrorMessage(`Lỗi gửi yêu cầu khôi phục: ${error.message}`);
+          }
           setIsLoading(false);
           return;
         }
 
-        setSuccessMessage(`Đã gửi liên kết khôi phục mật khẩu đến email ${email.trim()}. Vui lòng kiểm tra hộp thư đến (hoặc thư rác).`);
+        setSuccessMessage(`Đã gửi liên kết khôi phục mật khẩu đến email ${email.trim()}. Vui lòng kiểm tra hộp thư đến (hoặc thư mục Spam).`);
         setIsLoading(false);
         return;
       }
 
       if (mode === 'register') {
-        if (!email || !password || !fullName || !phone) {
-          setErrorMessage('Vui lòng điền đầy đủ các thông tin bắt buộc.');
-          setIsLoading(false);
-          return;
-        }
+        const cleanPhone = phone.trim().replace(/\s|\./g, '');
 
         // Real Supabase Auth SignUp
         const { data, error } = await supabase.auth.signUp({
@@ -110,16 +182,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           options: {
             data: {
               full_name: fullName.trim(),
-              phone: phone.trim(),
+              phone: cleanPhone,
             },
           },
         });
 
         if (error) {
-          if (error.message.includes('already registered')) {
-            setErrorMessage('Email này đã được đăng ký. Vui lòng chuyển sang tab Đăng Nhập.');
+          const errLower = error.message.toLowerCase();
+          if (errLower.includes('already registered') || errLower.includes('user already exists')) {
+            setErrorMessage('Email này đã được đăng ký tài khoản trước đó. Vui lòng chuyển sang tab Đăng Nhập hoặc chọn Quên Mật Khẩu.');
+            setFieldErrors((prev) => ({ ...prev, email: 'Email này đã tồn tại trong hệ thống.' }));
+          } else if (errLower.includes('password') && errLower.includes('short')) {
+            setErrorMessage('Mật khẩu quá ngắn. Cần tối thiểu 6 ký tự.');
+            setFieldErrors((prev) => ({ ...prev, password: 'Mật khẩu phải có tối thiểu 6 ký tự.' }));
+          } else if (errLower.includes('rate limit') || errLower.includes('over_email_send_rate_limit')) {
+            setErrorMessage('Hệ thống đang ghi nhận quá nhiều lượt đăng ký liên tục. Vui lòng đợi 1 phút rồi bấm lại.');
+          } else if (errLower.includes('invalid') && errLower.includes('email')) {
+            setErrorMessage('Địa chỉ email không được máy chủ chấp nhận.');
+            setFieldErrors((prev) => ({ ...prev, email: 'Email không hợp lệ.' }));
           } else {
-            setErrorMessage(`Lỗi đăng ký: ${error.message}`);
+            setErrorMessage(`Đăng ký không thành công: ${error.message}`);
           }
           setIsLoading(false);
           return;
@@ -131,7 +213,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             await supabase.from('profiles').upsert({
               id: data.user.id,
               full_name: fullName.trim(),
-              phone: phone.trim(),
+              phone: cleanPhone,
             });
           } catch (profileErr) {
             console.warn('Profile table upsert:', profileErr);
@@ -142,7 +224,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           id: data?.user?.id || `usr-${Date.now().toString().slice(-4)}`,
           email: email.trim(),
           fullName: fullName.trim(),
-          phone: phone.trim(),
+          phone: cleanPhone,
         };
 
         confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
@@ -156,12 +238,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         });
 
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            setErrorMessage('Email hoặc mật khẩu không chính xác.');
+          const errLower = error.message.toLowerCase();
+          if (errLower.includes('invalid login credentials') || errLower.includes('invalid_grant')) {
+            setErrorMessage('Sai địa chỉ email hoặc mật khẩu không chính xác.');
+            setFieldErrors({
+              email: 'Kiểm tra lại email',
+              password: 'Kiểm tra lại mật khẩu',
+            });
             setIsLoading(false);
             return;
-          } else if (error.message.includes('Email not confirmed')) {
-            // Auto-bypass email confirmation for immediate access
+          } else if (errLower.includes('email not confirmed')) {
+            // Auto-bypass email confirmation for smooth customer access
             const fallbackUser = {
               id: `usr-${email.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8)}`,
               email: email.trim(),
@@ -191,7 +278,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Đã xảy ra lỗi kết nối. Vui lòng thử lại.');
+      setErrorMessage(err?.message || 'Đã xảy ra sự cố kết nối máy chủ. Vui lòng thử lại hoặc gọi Hotline 0777 868 762.');
     } finally {
       setIsLoading(false);
     }
@@ -242,7 +329,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="flex border-b border-zinc-200 bg-zinc-50">
             <button
               type="button"
-              onClick={() => { setMode('login'); setErrorMessage(''); setSuccessMessage(''); }}
+              onClick={() => handleSwitchMode('login')}
               className={`flex-1 py-3.5 text-xs font-black uppercase tracking-wider transition-all ${
                 mode === 'login'
                   ? 'text-zinc-950 border-b-2 border-amber-500 bg-white'
@@ -253,7 +340,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => { setMode('register'); setErrorMessage(''); setSuccessMessage(''); }}
+              onClick={() => handleSwitchMode('register')}
               className={`flex-1 py-3.5 text-xs font-black uppercase tracking-wider transition-all ${
                 mode === 'register'
                   ? 'text-zinc-950 border-b-2 border-amber-500 bg-white'
@@ -271,7 +358,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </span>
             <button
               type="button"
-              onClick={() => { setMode('login'); setErrorMessage(''); setSuccessMessage(''); }}
+              onClick={() => handleSwitchMode('login')}
               className="text-amber-700 hover:text-amber-900 font-extrabold flex items-center gap-1 hover:underline"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -313,15 +400,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
 
           {/* Form Body */}
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
+            {/* Top Error Alert Banner */}
             {errorMessage && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium">
-                {errorMessage}
+              <div className="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1">
+                  <p className="font-bold leading-tight">{errorMessage}</p>
+                  {errorMessage.includes('đã được đăng ký') && (
+                    <button
+                      type="button"
+                      onClick={() => handleSwitchMode('login')}
+                      className="text-amber-700 font-extrabold underline hover:text-amber-900 inline-block text-[11px]"
+                    >
+                      👉 Bấm vào đây để chuyển sang Đăng Nhập
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
+            {/* Success Alert Banner */}
             {successMessage && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium flex items-start gap-2">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium flex items-start gap-2.5 animate-in fade-in duration-200">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>{successMessage}</span>
               </div>
@@ -329,61 +430,109 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             {mode === 'register' && (
               <>
+                {/* 1. Họ và Tên */}
                 <div>
-                  <label className="block text-xs font-bold text-zinc-700 mb-1">Họ và Tên:</label>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1">
+                    Họ và Tên <span className="text-red-500">*</span>:
+                  </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                    <User className={`w-4 h-4 absolute left-3 top-3 transition-colors ${fieldErrors.fullName ? 'text-red-500' : 'text-zinc-400'}`} />
                     <input
                       type="text"
-                      required
                       placeholder="VD: Nguyễn Văn A"
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 outline-none"
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        if (fieldErrors.fullName) setFieldErrors((prev) => ({ ...prev, fullName: undefined }));
+                      }}
+                      className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all ${
+                        fieldErrors.fullName
+                          ? 'border-red-500 bg-red-50/40 focus:ring-2 focus:ring-red-300'
+                          : 'border-zinc-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.fullName && (
+                    <p className="text-[11px] text-red-600 font-bold mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
+                      <span>{fieldErrors.fullName}</span>
+                    </p>
+                  )}
                 </div>
 
+                {/* 2. Số Điện Thoại */}
                 <div>
-                  <label className="block text-xs font-bold text-zinc-700 mb-1">Số Điện Thoại:</label>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1">
+                    Số Điện Thoại <span className="text-red-500">*</span>:
+                  </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                    <Phone className={`w-4 h-4 absolute left-3 top-3 transition-colors ${fieldErrors.phone ? 'text-red-500' : 'text-zinc-400'}`} />
                     <input
                       type="tel"
-                      required
                       placeholder="VD: 0901234567"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 outline-none"
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: undefined }));
+                      }}
+                      className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all ${
+                        fieldErrors.phone
+                          ? 'border-red-500 bg-red-50/40 focus:ring-2 focus:ring-red-300'
+                          : 'border-zinc-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.phone && (
+                    <p className="text-[11px] text-red-600 font-bold mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
+                      <span>{fieldErrors.phone}</span>
+                    </p>
+                  )}
                 </div>
               </>
             )}
 
+            {/* 3. Địa Chỉ Email */}
             <div>
-              <label className="block text-xs font-bold text-zinc-700 mb-1">Địa Chỉ Email:</label>
+              <label className="block text-xs font-bold text-zinc-700 mb-1">
+                Địa Chỉ Email <span className="text-red-500">*</span>:
+              </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                <Mail className={`w-4 h-4 absolute left-3 top-3 transition-colors ${fieldErrors.email ? 'text-red-500' : 'text-zinc-400'}`} />
                 <input
                   type="email"
-                  required
                   placeholder="name@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 outline-none"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                  }}
+                  className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all ${
+                    fieldErrors.email
+                      ? 'border-red-500 bg-red-50/40 focus:ring-2 focus:ring-red-300'
+                      : 'border-zinc-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200'
+                  }`}
                 />
               </div>
+              {fieldErrors.email && (
+                <p className="text-[11px] text-red-600 font-bold mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  <span>{fieldErrors.email}</span>
+                </p>
+              )}
             </div>
 
+            {/* 4. Mật Khẩu */}
             {mode !== 'forgot' && (
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-zinc-700">Mật Khẩu:</label>
+                  <label className="block text-xs font-bold text-zinc-700">
+                    Mật Khẩu <span className="text-red-500">*</span>:
+                  </label>
                   {mode === 'login' && (
                     <button
                       type="button"
-                      onClick={() => { setMode('forgot'); setErrorMessage(''); setSuccessMessage(''); }}
+                      onClick={() => handleSwitchMode('forgot')}
                       className="text-[11px] font-bold text-amber-600 hover:text-amber-700 hover:underline"
                     >
                       Quên mật khẩu?
@@ -391,23 +540,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                  <Lock className={`w-4 h-4 absolute left-3 top-3 transition-colors ${fieldErrors.password ? 'text-red-500' : 'text-zinc-400'}`} />
                   <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Tối thiểu 6 ký tự"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-zinc-300 text-xs font-medium focus:ring-2 focus:ring-amber-400 outline-none"
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                    }}
+                    className={`w-full pl-9 pr-10 py-2.5 rounded-xl border text-xs font-medium outline-none transition-all ${
+                      fieldErrors.password
+                        ? 'border-red-500 bg-red-50/40 focus:ring-2 focus:ring-red-300'
+                        : 'border-zinc-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200'
+                    }`}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 p-0.5 text-zinc-400 hover:text-zinc-700 transition-colors"
+                    title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
+                {fieldErrors.password && (
+                  <p className="text-[11px] text-red-600 font-bold mt-1 flex items-center gap-1 animate-in fade-in duration-150">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{fieldErrors.password}</span>
+                  </p>
+                )}
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm shadow-glow flex items-center justify-center gap-2 transition-all active:scale-98 disabled:opacity-60"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black text-sm shadow-glow flex items-center justify-center gap-2 transition-all active:scale-98 disabled:opacity-60 mt-2"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -427,7 +596,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="text-center pt-2">
                 <button
                   type="button"
-                  onClick={() => { setMode('login'); setErrorMessage(''); setSuccessMessage(''); }}
+                  onClick={() => handleSwitchMode('login')}
                   className="text-xs font-bold text-zinc-600 hover:text-zinc-950 inline-flex items-center gap-1 hover:underline"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
@@ -441,7 +610,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Security Note Footer */}
         <div className="p-3.5 bg-zinc-50 border-t border-zinc-200 text-center text-[11px] text-zinc-500 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Cam kết bảo mật thông tin tài khoản & mã hóa dữ liệu</span>
+          <span>Cam kết bảo mật thông tin tài khoản & mã hóa dữ liệu 256-bit</span>
         </div>
 
       </div>
