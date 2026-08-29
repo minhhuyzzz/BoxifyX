@@ -317,15 +317,15 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ onNavigate }) => {
                     AI Online
                   </span>
                 </h3>
-                <p className="text-[11px] text-zinc-400">Kết nối AI thời gian thực • Hotline 1900 6868</p>
+                <p className="text-[11px] text-zinc-400">Kết nối AI thời gian thực • Hotline 0777 868 762</p>
               </div>
             </div>
 
             <div className="flex items-center gap-1">
               <a
-                href="tel:19006868"
+                href="tel:0777868762"
                 className="p-2 rounded-xl text-zinc-400 hover:text-amber-400 hover:bg-zinc-900 transition-colors"
-                title="Gọi Hotline 1900 6868"
+                title="Gọi Hotline 0777 868 762"
               >
                 <Phone className="w-4 h-4" />
               </a>
