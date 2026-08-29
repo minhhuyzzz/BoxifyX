@@ -20,22 +20,27 @@ import { MOCK_STATIONS } from './data/mockData';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabaseClient';
 
-const PAGE_TO_HASH: Record<PageView, string> = {
-  home: '#/',
-  locker: '#/smart-locker',
-  valet: '#/valet-storage',
-  closet: '#/digital-closet',
-  pricing: '#/pricing',
-  security: '#/security',
-  policy: '#/policy',
-  faq: '#/faq',
+const PAGE_TO_PATH: Record<PageView, string> = {
+  home: '/',
+  locker: '/smart-locker',
+  valet: '/valet-storage',
+  closet: '/digital-closet',
+  pricing: '/pricing',
+  security: '/security',
+  policy: '/policy',
+  faq: '/faq',
 };
 
-const parseHashRoute = (rawHash: string): { page: PageView; tab?: PolicyTab } => {
-  const clean = (rawHash || '').replace(/^#\/?/, '');
-  const [routePath, queryString] = clean.split('?');
-  const path = (routePath || '').toLowerCase().trim();
-  const searchParams = new URLSearchParams(queryString || '');
+const parseCurrentRoute = (): { page: PageView; tab?: PolicyTab } => {
+  // Lấy đường dẫn từ pathname hoặc fallback sang hash nếu có
+  let raw = window.location.pathname || '/';
+  if (window.location.hash) {
+    raw = window.location.hash.replace(/^#\/?/, '/');
+  }
+
+  const [routePath, queryString] = raw.split('?');
+  const path = (routePath || '/').toLowerCase().replace(/^\/+|\/+$/g, '').trim();
+  const searchParams = new URLSearchParams(queryString || window.location.search || '');
   const tabParam = searchParams.get('tab') as PolicyTab;
   const validTabs: PolicyTab[] = ['terms', 'privacy', 'sealing', 'insurance', 'dispute'];
   const matchedTab = validTabs.includes(tabParam) ? tabParam : undefined;
@@ -69,7 +74,7 @@ const parseHashRoute = (rawHash: string): { page: PageView; tab?: PolicyTab } =>
 };
 
 export function App() {
-  const initialRoute = parseHashRoute(window.location.hash || '#/');
+  const initialRoute = parseCurrentRoute();
   const [currentPage, setCurrentPage] = useState<PageView>(initialRoute.page);
   const [policyTab, setPolicyTab] = useState<PolicyTab>(initialRoute.tab || 'terms');
   const [stations, setStations] = useState<LockerStation[]>(MOCK_STATIONS);
@@ -89,18 +94,22 @@ export function App() {
   const [unlockModalBooking, setUnlockModalBooking] = useState<LockerBooking | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
-  // Sync window hash changes (forward / back button support)
+  // Sync popstate / hashchange (forward / back browser buttons)
   useEffect(() => {
-    const handleHashChange = () => {
-      const resolved = parseHashRoute(window.location.hash || '#/');
+    const handleRouteChange = () => {
+      const resolved = parseCurrentRoute();
       setCurrentPage(resolved.page);
       if (resolved.page === 'policy' && resolved.tab) {
         setPolicyTab(resolved.tab);
       }
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleRouteChange);
+    window.addEventListener('hashchange', handleRouteChange);
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+      window.removeEventListener('hashchange', handleRouteChange);
+    };
   }, []);
 
   // Check existing Supabase session on mount
@@ -178,15 +187,18 @@ export function App() {
 
   const handleNavigate = (page: PageView, tab?: PolicyTab) => {
     setCurrentPage(page);
+    let targetPath = PAGE_TO_PATH[page] || '/';
     if (page === 'policy') {
       if (tab) {
         setPolicyTab(tab);
-        window.location.hash = `#/policy?tab=${tab}`;
+        targetPath = `/policy?tab=${tab}`;
       } else {
-        window.location.hash = '#/policy';
+        targetPath = '/policy';
       }
-    } else {
-      window.location.hash = PAGE_TO_HASH[page] || '#/';
+    }
+
+    if (window.location.pathname !== targetPath || window.location.hash) {
+      window.history.pushState({}, '', targetPath);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
