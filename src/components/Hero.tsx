@@ -34,31 +34,31 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
   const priceResult = calculateLockerFee(quickSize, quickHours);
 
   return (
-    <section id="hero-section" className="relative overflow-hidden pt-6 pb-0 bg-gradient-to-b from-amber-50/70 via-white to-zinc-50/50">
-      {/* Ambient background glows */}
-      <div className="absolute top-0 left-1/4 w-[600px] h-[350px] bg-gradient-to-tr from-amber-300/20 via-orange-300/15 to-transparent blur-3xl pointer-events-none -z-10 rounded-full" />
-      <div className="absolute top-20 right-10 w-[500px] h-[400px] bg-gradient-to-br from-orange-400/15 to-amber-200/10 blur-3xl pointer-events-none -z-10 rounded-full" />
+    <section id="hero-section" className="relative overflow-hidden pt-2 pb-0 bg-transparent">
+      {/* Ambient background glows spanning up to the header */}
+      <div className="absolute -top-32 left-1/4 w-[750px] h-[500px] bg-gradient-to-tr from-amber-300/30 via-orange-300/20 to-transparent blur-3xl pointer-events-none -z-10 rounded-full" />
+      <div className="absolute -top-28 right-10 w-[650px] h-[550px] bg-gradient-to-br from-orange-400/20 to-amber-200/15 blur-3xl pointer-events-none -z-10 rounded-full" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ======================================================== */}
         {/* TOP ROW: 2-COLUMN HERO (TEXT LEFT | CLEAN HERO IMAGE RIGHT) */}
         {/* ======================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-4 pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center pt-2 pb-10">
 
           {/* Left Column: Heading, Subtitle & Primary Buttons */}
           <div className="lg:col-span-6 space-y-6 text-left">
 
             {/* Top Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-amber-300 shadow-sm text-zinc-900 text-xs font-black tracking-wide uppercase">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-amber-300 shadow-sm text-zinc-900 text-xs font-black tracking-wide uppercase">
               <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
               <span>Nền Tảng Lưu Trữ Kỹ Thuật Số • 27 Trạm Toàn TP.HCM</span>
             </div>
 
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-zinc-950 leading-[1.12]">
+            {/* Main Headline: Giãn cách dòng thoáng đãng, không bị dính dấu tiếng Việt */}
+            <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-black text-zinc-950 leading-[1.32] tracking-normal">
               Dịch Vụ Lưu Trữ Valet &{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 inline-block py-0.5">
                 Tủ Đồ Thông Minh
               </span>{' '}
               TP.HCM
