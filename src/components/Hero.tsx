@@ -147,27 +147,9 @@ export const Hero: React.FC<HeroProps> = ({ onNavigateToLocker, onNavigateToVale
                 </div>
               </div>
 
-              {/* Floating Decorative Badge 1: Kho Mát 25°C */}
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl p-3 shadow-xl border border-zinc-200 hidden sm:flex items-center gap-2.5 z-20 hover:-translate-y-1 transition-transform">
-                <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-800 flex items-center justify-center font-bold">
-                  <ThermometerSnowflake className="w-5 h-5 text-orange-600" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-xs font-black text-zinc-950">Kho Mát 25°C</h4>
-                  <p className="text-[10px] text-zinc-500">Độ ẩm &lt;50% Chống ẩm mốc</p>
-                </div>
-              </div>
 
-              {/* Floating Decorative Badge 2: Bảo Hiểm 20Tr */}
-              <div className="absolute -top-4 -right-4 bg-white rounded-2xl p-3 shadow-xl border border-zinc-200 hidden sm:flex items-center gap-2.5 z-20 hover:-translate-y-1 transition-transform">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                  <Award className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-xs font-black text-zinc-950">Bảo Hiểm 20.000.000 đ</h4>
-                  <p className="text-[10px] text-zinc-500">Bảo hiểm mặc định từng kiện</p>
-                </div>
-              </div>
+
+
 
             </div>
           </div>
